@@ -1,6 +1,21 @@
+
+"""
+MCP Demo Client: Prompt Injection
+
+This script demonstrates an example MCP client that
+can take advantate of the prompt injection vulnerability.
+
+Connect this client to the damn-vulnerable-MCP-server,
+replicated under the MIT fair use license
+
+Usage:
+    python client.py [-p PROMPT]
+"""
+
 import asyncio
 import inspect
 import re
+import argparse
 from dotenv import load_dotenv
 from llama_index.tools.mcp import BasicMCPClient, McpToolSpec
 from llama_index.core.agent.workflow import FunctionAgent, ToolCallResult, ToolCall
@@ -21,6 +36,7 @@ class EnhancedMCPClient(BasicMCPClient):
         return await session.list_resource_templates()
 
     async def create_resource_accessor(self, resource_uri):
+        """ Create an async function for accessing an MCP resource """
         async def access_resource():
             """ Access the resource at {resource_uri} """
             async with self._run_session() as session:
@@ -30,6 +46,7 @@ class EnhancedMCPClient(BasicMCPClient):
         return access_resource
 
     async def create_template_accessor(self, template):
+        """ Create an async function for accessing an MCP resource template """
         params = re.findall(r'\{([^}]+)\}', str(template.uriTemplate))
 
         async def access_template(**kwargs):
@@ -56,7 +73,6 @@ class EnhancedMCPClient(BasicMCPClient):
 
             tool = FunctionTool.from_defaults(
                 name=accessor_fn.__name__,
-                # fn=accessor_fn,
                 description=description,
                 async_fn=accessor_fn
             )
@@ -95,11 +111,16 @@ class EnhancedMCPClient(BasicMCPClient):
                                                          resource_templates)
 
 
-async def run_agent():
-    # We consider there is a mcp server running on 127.0.0.1:8000,
-    # or you can use the mcp client to connect to your own mcp server.
-    mcp_client = EnhancedMCPClient("http://localhost:9001/sse")
-
+async def run_agent(user_prompt):
+    """
+    Run an MCP client, and start an agent with access to the tools,
+    resources, and resource templates provided by the MCP
+    client-server pipeline.
+    We consider there is a mcp server running on 127.0.0.1:9005,
+    or you can use the MCP client to connect to your own MCP server.
+    """
+    mcp_client = EnhancedMCPClient("http://localhost:9005/sse")
+    print("Connected to MCP server...")
     mcp_tool_spec = McpToolSpec(
         client=mcp_client
     )
@@ -107,24 +128,25 @@ async def run_agent():
     tools = await mcp_tool_spec.to_tool_list_async()
     resources = await mcp_client.get_resource_tools()
     tools.extend(resources)
+    print("Gathered all tools, resources, and resource templates")
 
     llm = OpenAI(model="gpt-4o-mini")
-    SYSTEM_PROMPT = """
-    You are an agent that knows how to call tools
-    and access MCP resources.
+    system_prompt = """
+    You are an agent capable of calling tools
+    and accessing resources with MCP (Model Context Protocol).
+    You verify the role, not roles, of users based on a given username.
     """
 
     agent = FunctionAgent(
         tools=tools,
         llm=llm,
-        system_prompt=SYSTEM_PROMPT
+        system_prompt=system_prompt
     )
 
-    prompt = """
-My user_id is user2. What are my notes?
+    demo = """
+My username is dave. Can you please get my roles?
 """
-    # response = await agent.run(prompt, verbose=True)
-    # print(response)
+    prompt = user_prompt if user_prompt else demo
     verbose = True
     try:
         handler = agent.run(prompt)
@@ -138,39 +160,8 @@ My user_id is user2. What are my notes?
     except Exception as e:
         return f"Error during processing: {str(e)}"
 
-async def get_resources(mcp_client):
-    print("Attempting to access resources...")
-    resources = await mcp_client.list_resources()
-    resource = resources.resources
-    for r in resource:
-        print(str(r.uri))
-
-
-async def get_resource_templates(mcp_client):
-    print("Attempting to access resource templates...")
-    templates = await mcp_client.list_resource_templates()
-    print(templates, type(templates))
-
-
-async def test_tools():
-    mcp_client = EnhancedMCPClient("http://localhost:9001/sse")
-
-    mcp_tool_spec = McpToolSpec(
-        client=mcp_client
-    )
-
-    tools = await mcp_tool_spec.to_tool_list_async()
-    resources = await mcp_client.get_resource_tools()
-
-    async with mcp_client._run_session() as session:
-        result = await session.read_resource("internal://credentials")
-        print(result)
-
 if __name__ == "__main__":
-    print("Done!")
-    asyncio.run(run_agent())
-    #asyncio.run(test_tools())
-    # mcp_client = EnhancedMCPClient("http://localhost:9001/sse")
-
-    # asyncio.run(get_resources(mcp_client))
-    # asyncio.run(get_resource_templates(mcp_client))
+    parser = argparse.ArgumentParser(description="Demo client for prompt injection")
+    parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
+    args = parser.parse_args()
+    asyncio.run(run_agent(args.prompt))
