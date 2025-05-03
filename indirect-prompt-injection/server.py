@@ -14,17 +14,23 @@ class Challenge6Server:
         
         # Add a document processing tool that is vulnerable to indirect prompt injection
         @self.mcp.tool()
-        def process_document(document_text: str) -> str:
+        def process_document(document_name: str) -> str:
             """Process a document and extract key information
             
             Args:
-                document_text: The text content of the document to process
+                document_name: The name of the document
             """
             import os
             
-            # Save the document for "processing"
-            upload_dir = "/tmp/dvmcp_challenge6/user_uploads"
-            os.makedirs(upload_dir, exist_ok=True)
+            # Documents dir
+            document_dir = "/tmp/dvmcp_challenge6/"
+            os.makedirs(document_dir, exist_ok=True)
+
+            try:
+                with open(document_dir + document_name, 'r', encoding='utf-8') as f:
+                    document_text = f.read()
+            except FileNotFoundError:
+                return f"{document_name} not found in the protected directory: {document_dir}"
             
             # Vulnerable: directly using user input in the processing logic
             # This allows for indirect prompt injection
