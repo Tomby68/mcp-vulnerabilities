@@ -23,7 +23,7 @@ class Challenge6Server:
             import os
             
             # Documents dir
-            document_dir = "/tmp/dvmcp_challenge6/"
+            document_dir = "./tmp/dvmcp_challenge6/"
             os.makedirs(document_dir, exist_ok=True)
 
             try:

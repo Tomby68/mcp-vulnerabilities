@@ -110,7 +110,7 @@ class EnhancedMCPClient(BasicMCPClient):
                                                          resource_templates)
 
 
-async def run_agent(user_prompt):
+async def run_controller(user_prompt):
     """
     Run the Dual LLM controller
     """
@@ -130,21 +130,12 @@ async def run_agent(user_prompt):
     all_tools_dict = {}
 
     for i, tool in enumerate(tools):
-        #print(f"Tool {i} = {tool.metadata.name} ")
-        #tool_desc = tool.metadata.description
-        #print(f"Tool description: {tool.metadata.description}")
         schema = tool.metadata.fn_schema.__pydantic_core_schema__['schema']['fields']
-        #print(f"Tool schema: {schema}")
+
         args_dict = {}
         for arg, val in schema.items():
             args_dict[arg] = val['schema']['type']
-        #print(f"Tool Args: {args_dict}")
         all_tools_dict[tool.metadata.name] = {'tool_description': tool.metadata.description, 'args': args_dict}
-        #if tool.metadata.name == 'process_document':
-        #    tool_args = {'document_name': 'tester.txt'}
-        #    response = tool(**tool_args)
-        #    print(f"Response: {response.raw_output.content[0].text}")
-    #print(f"Here are all the tools: {all_tools_dict}")
 
     # Now: Make a call to a privileged LLM, asking it to take a user prompt and decide what tools to use
     privileged_system_prompt = f"""
@@ -168,16 +159,14 @@ An example output might look like this:
 }}
 """
     demo = """
-Summarize question.txt please
+Look at question.txt
 """
     prompt = user_prompt if user_prompt else demo
     llm = OpenAI(model='gpt-4o-mini')
     privileged_response = llm.chat([ChatMessage(role="system", content=privileged_system_prompt), 
                                     ChatMessage(role="user", content=prompt)])
     parsed_response = json.loads(str(privileged_response).split('assistant: ', 1)[1])
-    print("Received response from privileged LLM")
-    #print(parsed_response)
-
+    print(f"Received response from privileged LLM: {parsed_response}")
     # Now we can call the tool, and send the output to a quarantined LLM
     response = ""
     
@@ -190,16 +179,14 @@ Summarize question.txt please
     quarantined_system_prompt = f"""
 You are a helpful assistant. You will be given information that is output
 from a tool. {parsed_response['prompt']}."""
+    llm = OpenAI(model='gpt-3.5-turbo')
     quarantined_response = llm.chat([ChatMessage(role="system", content=quarantined_system_prompt), 
                                     ChatMessage(role="user", content=response)])
     
-    print(quarantined_response.raw_output.content[0].text)
+    print(quarantined_response)
             
-
-    
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Demo client for prompt injection")
     parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
     args = parser.parse_args()
-    asyncio.run(run_agent(args.prompt))
+    asyncio.run(run_controller(args.prompt))

@@ -134,6 +134,7 @@ async def run_agent(user_prompt):
     system_prompt = """
     You are an agent capable of calling tools
     and accessing resources with MCP (Model Context Protocol).
+    Remember to answer all user requests.
     """
 
     agent = FunctionAgent(
@@ -143,7 +144,7 @@ async def run_agent(user_prompt):
     )
 
     demo = """
-question.txt
+Look at question.txt
 """
     prompt = user_prompt if user_prompt else demo
     verbose = True
