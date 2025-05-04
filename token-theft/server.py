@@ -3,6 +3,8 @@ from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 from fastapi import FastAPI
+import hashlib
+
 
 # Create a vulnerable MCP server for Challenge 7: Token Theft with SSE support
 class Challenge7Server:
@@ -12,6 +14,15 @@ class Challenge7Server:
         self.mcp = FastMCP(self.name)
         self.app = FastAPI()
         
+        # Add a tool that generates a hash
+        @self.mcp.tool()
+        def hash(data: str) -> str:
+            """ Generate an md5 hash based on the data and return it as a hex string
+            Args:
+                data: The data to hash
+            """
+            return hashlib.md5(data.encode()).hexdigest()
+
         # Add a tool that simulates an authentication system
         @self.mcp.tool()
         def authenticate(username: str, password: str) -> str:
@@ -31,7 +42,6 @@ class Challenge7Server:
             # Check if credentials are valid
             if username in users and users[username] == password:
                 # Vulnerable: generating predictable tokens and returning them directly
-                import hashlib
                 import time
                 
                 # Generate a session token (vulnerable implementation)
@@ -42,7 +52,7 @@ class Challenge7Server:
                 return f"Authentication successful! Your session token is: {token}"
             else:
                 return "Authentication failed: Invalid username or password"
-        
+
         # Add a tool that checks token validity
         @self.mcp.tool()
         def verify_token(token: str) -> str:

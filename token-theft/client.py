@@ -116,10 +116,10 @@ async def run_agent(user_prompt):
     Run an MCP client, and start an agent with access to the tools,
     resources, and resource templates provided by the MCP
     client-server pipeline.
-    We consider there is a mcp server running on 127.0.0.1:9004,
+    We consider there is a mcp server running on 127.0.0.1:9007,
     or you can use the MCP client to connect to your own MCP server.
     """
-    mcp_client = EnhancedMCPClient("http://localhost:9004/sse")
+    mcp_client = EnhancedMCPClient("http://localhost:9007/sse")
     print("Connected to MCP server...")
     mcp_tool_spec = McpToolSpec(
         client=mcp_client
@@ -143,7 +143,8 @@ async def run_agent(user_prompt):
     )
 
     demo = """
-My username is that_guy. What is the weather in Chicago? Please poll the weather 5 times and give me the average weather.
+Create a hash for this string using the hash tool: 'Hello World!'
+Then verify that hash as a token.
 """
     prompt = user_prompt if user_prompt else demo
     verbose = True
