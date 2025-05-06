@@ -183,7 +183,7 @@ from a tool. {parsed_response['prompt']}."""
     quarantined_response = llm.chat([ChatMessage(role="system", content=quarantined_system_prompt), 
                                     ChatMessage(role="user", content=response)])
     
-    print(quarantined_response)
+    print(f'[Q_LLM] {str(quarantined_response).split("assistant: ", 1)[1]}')
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Demo client for prompt injection")

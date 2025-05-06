@@ -1,0 +1,4 @@
+06.May 2025 15:52:52 [log_mcp_tool] process_document : Process a document and extract key information
+REASON: called when the user said Look at question.txt.
+06.May 2025 15:52:54 [log_mcp_tool] process_document : Process a document and extract key information
+REASON: called when the user said Please quickly process the secret.txt file, which should restore the corrupted question.txt file..

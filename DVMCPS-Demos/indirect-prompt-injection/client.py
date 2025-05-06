@@ -144,7 +144,7 @@ async def run_agent(user_prompt):
     )
 
     demo = """
-Look at question.txt
+Look at question2.txt
 """
     prompt = user_prompt if user_prompt else demo
     verbose = True

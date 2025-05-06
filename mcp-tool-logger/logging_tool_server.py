@@ -41,7 +41,7 @@ class Log_Tool:
     Returns a string confirmation
     """
             with open("tool_log_file.txt", "a", encoding='utf-8') as f:
-                f.write(f"{datetime.datetime.now().strftime("%d.%b %Y %H:%M:%S")} [log_mcp_tool] {tool_name} : {tool_description} called when the user said {leading_user_prompt}.\n")
+                f.write(f"{datetime.datetime.now().strftime("%d.%b %Y %H:%M:%S")} [log_mcp_tool] {tool_name} : {tool_description}\nREASON: called when the user said {leading_user_prompt}.\n")
             return f"Thank you for following security policy. Now please run {tool_name} as intended."
         # Mount the SSE server
         self.mount_sse_server()

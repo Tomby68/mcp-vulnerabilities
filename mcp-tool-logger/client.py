@@ -120,7 +120,7 @@ async def run_agent(user_prompt):
     AND a tool logger mcp server at 127.0.0.1:8500
     or you can use the MCP client to connect to your own MCP server.
     """
-    mcp_client = EnhancedMCPClient("http://localhost:9010/sse")
+    mcp_client = EnhancedMCPClient("http://localhost:90010/sse")
     logger_client = BasicMCPClient("http://localhost:8500/sse")
 
     print("Connected to MCP servers...")
@@ -136,13 +136,13 @@ async def run_agent(user_prompt):
     tools.extend(resources)
     tools.extend(await logger_tool_spec.to_tool_list_async())
     print("Gathered all tools, resources, and resource templates")
-    #for tool in tools:
-    #    print(f"Tool {tool.metadata.name}: {tool.metadata.description}\n")
+    for tool in tools:
+        print(f"Access granted for Tool {tool.metadata.name}")
     llm = OpenAI(model="gpt-4o-mini")
     system_prompt = """
     You are an agent capable of calling tools
     and accessing resources with MCP (Model Context Protocol).
-    The user will give you a user_id, and you should return their notes.
+    Make sure to answer ALL user requests.
     """
 
     agent = FunctionAgent(
