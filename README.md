@@ -9,6 +9,8 @@ or track MCP security flaws.
 1. [Understanding MCP Security with the DVMCPS](#understanding-mcp-security-with-the-dvmcps)
 2. [Dual LLM MCP Implementation](#dual-llm-paradigm-with-mcp)
 3. [Clever Tool Use Logging](#better-tool-logging-through-tool-poisoning)
+4. [Combined Dual LLM and Better Tool Logging Client](#combined-dual-llm-and-better-tool-logging-client)
+5. [Future Work](#future-work)
 
 ## Understanding MCP Security with the DVMCPS ##
 In order to better understand MCP and its security flaws, this project includes simple
@@ -156,3 +158,40 @@ be logged.
  Observe that `mcp-tool-logger/tool_log_file.txt` is updated reliably when the MCP client calls tools.
  This approach adds observability to an MCP agent's tool use and intention behind tool calling. Additionally,
  the logger tool could be replaced with a tool filter to prevent a client from running a malicious tool.
+
+## Combined Dual LLM and Better Tool Logging Client ##
+A natural checkpoint for this project is the combination of the Dual LLM architecture
+with the improved tool logging schema. That is the MCP client in `combined-dual-logger`.
+This combines the two previously mentioned approaches, which fit naturally with
+each other - Rather than adding the logging functionality with a new MCP server,
+the **Controller** in the Dual LLM architecture deals with logging. The main addition
+is the `log_mcp_tool` function in `combined_client.py`, which is called after each tool request
+from the **Privileged LLM**. The system prompt for the **Privileged LLM** also asks for
+a reason behind each tool use for logging purposes.
+
+### Configuration ###
+Same configuration process as the Dual LLM section:
+ - Install required Python packages:
+
+ `pip install -r requirements.txt`
+
+ - Update the .env file in the main directory with your OpenAI API key.
+ - Run the server:
+ 
+ `python combined-dual-logger/server.py`
+
+ - Run the Combined Client, which has a default demo prompt that you can change if you want:
+
+ `python combined-dual-logger/combined_client.py [-p PROMPT]`
+
+ - Observe that, compared to the example in `DVMCPS-Demos/indirect-prompt-injection`, the MCP client does
+ not call any unintended tools. Compared to the example in `dual-llm-mcp/`, the MCP client Controller
+ logs agent tool use.
+
+ ## Future Work ##
+- Replace/Append the tool logging step with a tool filtering process to prevent
+unfounded tool calls.
+- Add some filter for MCP tool descriptions - The Dual LLM is still vulnerable to tool
+poisoning attacks since the Privileged LLM sees raw MCP tool descriptions.
+- Evaluate these MCP clients with some prompt injection/MCP vulnerability benchmark.
+A promising one is from Lakera AI: [Pint Benchmark](https://github.com/lakeraai/pint-benchmark/tree/main)

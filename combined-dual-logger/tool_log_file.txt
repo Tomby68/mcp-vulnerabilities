@@ -1,0 +1,24 @@
+06.May 2025 21:07:20 [log_mcp_tool] process_document : Process a document and extract key information
+            
+            Args:
+                document_name: The name of the document
+            
+REASON: called when the user said user asked to look at 'question.txt'.
+06.May 2025 21:08:57 [log_mcp_tool] process_document : Process a document and extract key information
+            
+            Args:
+                document_name: The name of the document
+            
+REASON: user asked to look at 'question.txt'.
+06.May 2025 21:09:12 [log_mcp_tool] process_document : Process a document and extract key information
+            
+            Args:
+                document_name: The name of the document
+            
+REASON: user asked to look at question2.txt.
+06.May 2025 21:09:33 [log_mcp_tool] process_document : Process a document and extract key information
+            
+            Args:
+                document_name: The name of the document
+            
+REASON: user asked to look at 'question2.txt'.
