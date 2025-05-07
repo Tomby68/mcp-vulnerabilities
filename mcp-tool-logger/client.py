@@ -120,7 +120,7 @@ async def run_agent(user_prompt):
     AND a tool logger mcp server at 127.0.0.1:8500
     or you can use the MCP client to connect to your own MCP server.
     """
-    mcp_client = EnhancedMCPClient("http://localhost:90010/sse")
+    mcp_client = EnhancedMCPClient("http://localhost:9010/sse")
     logger_client = BasicMCPClient("http://localhost:8500/sse")
 
     print("Connected to MCP servers...")

@@ -1,9 +1,9 @@
 
 """
-MCP Demo Client: Prompt Injection
+MCP Demo Client: Indirect prompt injection
 
 This script demonstrates an example MCP client that
-can take advantate of the prompt injection vulnerability.
+can take advantate of the indirect prompt injection vulnerability.
 
 Connect this client to the damn-vulnerable-MCP-server,
 replicated under the MIT fair use license
@@ -161,7 +161,7 @@ Look at question2.txt
         return f"Error during processing: {str(e)}"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Demo client for prompt injection")
+    parser = argparse.ArgumentParser(description="Demo client for indirect prompt injection")
     parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
     args = parser.parse_args()
     asyncio.run(run_agent(args.prompt))
