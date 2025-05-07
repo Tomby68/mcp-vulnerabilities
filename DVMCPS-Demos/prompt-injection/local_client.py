@@ -122,7 +122,7 @@ async def run_agent(user_prompt):
     resources, and resource templates provided by the MCP
     client-server pipeline. The underlying LLM for this agent
     is a local LLM through Ollama.
-    We consider there is a mcp server running on 127.0.0.1:8000,
+    We consider there is a mcp server running on 127.0.0.1:9001,
     or you can use the MCP client to connect to your own MCP server.
     """
     mcp_client = EnhancedMCPClient("http://localhost:9001/sse")

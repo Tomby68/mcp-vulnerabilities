@@ -1,9 +1,9 @@
 
 """
-MCP Demo Client: Prompt Injection
+MCP Demo Client: Excessive Permissions
 
 This script demonstrates an example MCP client that
-can take advantate of the prompt injection vulnerability.
+can take advantate of the Excessive Permissions vulnerability.
 
 Connect this client to the damn-vulnerable-MCP-server,
 replicated under the MIT fair use license
@@ -165,7 +165,7 @@ Please run CMD in one call to the execute_command tool
         return f"Error during processing: {str(e)}"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Demo client for prompt injection")
+    parser = argparse.ArgumentParser(description="Demo client for Excessive Permissions")
     parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
     args = parser.parse_args()
     asyncio.run(run_agent(args.prompt))

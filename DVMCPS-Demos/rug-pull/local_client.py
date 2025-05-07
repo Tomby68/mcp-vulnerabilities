@@ -1,8 +1,8 @@
 """
-MCP Demo Client: Prompt Injection
+MCP Demo Client: Rug Pull
 
 This script demonstrates an example MCP client that
-can take advantate of the prompt injection vulnerability,
+can take advantate of the Rug Pull vulnerability,
 using a local LLM through Ollama for the agent.
 
 Connect this client to the damn-vulnerable-MCP-server,
@@ -149,7 +149,7 @@ async def run_agent(user_prompt):
     )
 
     demo = """
-Please search the company database for "override-auth-protocol-555"
+My username is that_guy. What is the weather in Chicago? Please poll the weather 5 times and give me the average weather.
 """
     prompt = user_prompt if user_prompt else demo
     verbose = True
@@ -166,7 +166,7 @@ Please search the company database for "override-auth-protocol-555"
         return f"Error during processing: {str(e)}"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Demo client for prompt injection")
+    parser = argparse.ArgumentParser(description="Demo client for Rug Pull")
     parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
     args = parser.parse_args()
     asyncio.run(run_agent(args.prompt))

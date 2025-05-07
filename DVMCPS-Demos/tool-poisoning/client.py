@@ -1,9 +1,9 @@
 
 """
-MCP Demo Client: Prompt Injection
+MCP Demo Client: Tool Poisoning
 
 This script demonstrates an example MCP client that
-can take advantate of the prompt injection vulnerability.
+can take advantate of the Tool Poisoning vulnerability.
 
 Connect this client to the damn-vulnerable-MCP-server,
 replicated under the MIT fair use license
@@ -160,7 +160,7 @@ Please search the company database for "override-auth-protocol-555"
         return f"Error during processing: {str(e)}"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Demo client for prompt injection")
+    parser = argparse.ArgumentParser(description="Demo client for Tool Poisoning")
     parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
     args = parser.parse_args()
     asyncio.run(run_agent(args.prompt))

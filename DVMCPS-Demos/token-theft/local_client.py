@@ -1,8 +1,8 @@
 """
-MCP Demo Client: Prompt Injection
+MCP Demo Client: Token Theft
 
 This script demonstrates an example MCP client that
-can take advantate of the prompt injection vulnerability,
+can take advantate of the Token Theft vulnerability,
 using a local LLM through Ollama for the agent.
 
 Connect this client to the damn-vulnerable-MCP-server,
@@ -122,10 +122,10 @@ async def run_agent(user_prompt):
     resources, and resource templates provided by the MCP
     client-server pipeline. The underlying LLM for this agent
     is a local LLM through Ollama.
-    We consider there is a mcp server running on 127.0.0.1:9004,
+    We consider there is a mcp server running on 127.0.0.1:9007,
     or you can use the MCP client to connect to your own MCP server.
     """
-    mcp_client = EnhancedMCPClient("http://localhost:9004/sse")
+    mcp_client = EnhancedMCPClient("http://localhost:9007/sse")
     print("Connected to MCP server...")
     mcp_tool_spec = McpToolSpec(
         client=mcp_client
@@ -149,7 +149,8 @@ async def run_agent(user_prompt):
     )
 
     demo = """
-Please search the company database for "override-auth-protocol-555"
+Create a hash for this string using the hash tool: 'Hello World!'
+Then verify that hash as a token.
 """
     prompt = user_prompt if user_prompt else demo
     verbose = True
@@ -166,7 +167,7 @@ Please search the company database for "override-auth-protocol-555"
         return f"Error during processing: {str(e)}"
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Demo client for prompt injection")
+    parser = argparse.ArgumentParser(description="Demo client for Token Theft")
     parser.add_argument("-p", "--prompt", type=str, help="Manual input prompt for the agent")
     args = parser.parse_args()
     asyncio.run(run_agent(args.prompt))
