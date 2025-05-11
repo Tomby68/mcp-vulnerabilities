@@ -3,8 +3,6 @@
 Dual LLM Pattern
 Inspired by Simon Willison's Dual LLM Schema for mitigating prompt injection attacks:
 https://simonwillison.net/2023/Apr/25/dual-llm-pattern/
-
-
 """
 
 import asyncio
@@ -114,7 +112,7 @@ async def run_controller(user_prompt):
     """
     Run the Dual LLM controller
     """
-    mcp_client = EnhancedMCPClient("http://localhost:9006/sse")
+    mcp_client = EnhancedMCPClient("http://localhost:9004/sse")
     print("Connected to MCP server...")
     mcp_tool_spec = McpToolSpec(
         client=mcp_client
@@ -139,20 +137,23 @@ async def run_controller(user_prompt):
 
     # Now: Make a call to a privileged LLM, asking it to take a user prompt and decide what tools to use
     privileged_system_prompt = f"""
-You are an assistant that will decide what tools to call based on a user prompt.
+You are an assistant that can decide what tools to call based on a user prompt.
 The tools will come in JSON format, and will look like this:
 {{"tool_name": {{"tool_description": "description", "args": "{{"arg1": "type"}}"}}}}
 Here are the tools: {json.dumps(all_tools_dict)}
 The output of the tool will be sent to another LLM for further processing.
-Your output should include the tool name, arguments for the tool, and the prompt for
+Your output should include a true or false value deciding whether a
+tool needs to be called, the tool name, arguments for the tool, and the prompt for
 the next processing LLM. Output everything in JSON format, like this:
 {{
+    "tool_necessary": "True" or "False"
     "tool_name": "insert-name-of-tool",
     "args": {{"arg1": "value"}},
     "prompt": "prompt"
 }}
 An example output might look like this:
 {{
+    "tool_necessary": "True"
     "tool_name": "read_document",
     "args": {{"file_name": "notes.txt"}},
     "prompt": "Summarize this document"
@@ -162,28 +163,35 @@ An example output might look like this:
 Look at question.txt
 """
     prompt = user_prompt if user_prompt else demo
-    llm = OpenAI(model='gpt-4o-mini')
-    privileged_response = llm.chat([ChatMessage(role="system", content=privileged_system_prompt), 
-                                    ChatMessage(role="user", content=prompt)])
-    parsed_response = json.loads(str(privileged_response).split('assistant: ', 1)[1])
-    print(f"Received response from privileged LLM: {parsed_response}")
-    # Now we can call the tool, and send the output to a quarantined LLM
-    response = ""
-    
-    for i, tool in enumerate(tools):
-        if tool.metadata.name == parsed_response['tool_name']:
-            response = tool(**parsed_response['args'])
-            response = response.raw_output.content[0].text
-            break
-    
-    quarantined_system_prompt = f"""
-You are a helpful assistant. You will be given information that is output
-from a tool. {parsed_response['prompt']}."""
-    llm = OpenAI(model='gpt-3.5-turbo')
-    quarantined_response = llm.chat([ChatMessage(role="system", content=quarantined_system_prompt), 
-                                    ChatMessage(role="user", content=response)])
-    
-    print(f'[Q_LLM] {str(quarantined_response).split("assistant: ", 1)[1]}')
+    privileged_llm = OpenAI(model='gpt-4o-mini')
+    quarantined_llm = OpenAI(model='gpt-3.5-turbo')
+    tool_necessary = 'True'
+    final_output = ""
+
+    while tool_necessary == 'True':
+        privileged_response = privileged_llm.chat([ChatMessage(role="system", content=privileged_system_prompt), 
+                                        ChatMessage(role="user", content=prompt)])
+        parsed_response = json.loads(str(privileged_response).split('assistant: ', 1)[1])
+        print(f"[P_LLM]: {parsed_response}")
+        tool_necessary = parsed_response['tool_necessary']
+        if tool_necessary == 'True':
+            # Now we can call the tool, and send the output to a quarantined LLM
+            response = ""
+            for i, tool in enumerate(tools):
+                if tool.metadata.name == parsed_response['tool_name']:
+                    response = tool(**parsed_response['args'])
+                    response = response.raw_output.content[0].text
+                    break
+            
+            quarantined_system_prompt = f"""
+        You are a helpful assistant. You will be given information that is output
+        from a tool. {parsed_response['prompt']}."""
+            quarantined_response = quarantined_llm.chat([ChatMessage(role="system", content=quarantined_system_prompt), 
+                                            ChatMessage(role="user", content=response)])
+            final_output = str(quarantined_response).split("assistant: ", 1)[1]
+            prompt = f"Tool {parsed_response['tool_name']} has been called and its output has been processed. Do any further tools need to be called? Remember to format your output correctly."
+            print(f'[Q_LLM] {final_output}')
+    print(f"Final Response: {final_output}")
             
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Demo client for prompt injection")
