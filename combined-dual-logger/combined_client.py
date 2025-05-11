@@ -1,4 +1,3 @@
-
 """
 Dual LLM Pattern + Better Tool Logging
 Inspired by two things:
