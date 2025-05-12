@@ -142,7 +142,7 @@ The tools are in JSON format and look like this:
 {{"tool_name": {{"tool_description": "description", "args": "{{"arg1": "type"}}"}}}}
 Here are the tools: {json.dumps(all_tools_dict)}
 Tool output can be sent to another LLM for further processing, but no other LLM
-can call tools, only you can.
+can call tools.
 Your output should include: a true or false value on whether a
 tool needs to be called, the tool name, arguments for the tool, a true or
 false value on whether the tool output needs to be sent to a processing LLM or
