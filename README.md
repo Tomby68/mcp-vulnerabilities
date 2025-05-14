@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tomby68-mcp-vulnerabilities-badge.png)](https://mseep.ai/app/tomby68-mcp-vulnerabilities)
+
 # Model Context Protocol (MCP) Security
 
 This project focuses on MCP client security, and how MCP servers
